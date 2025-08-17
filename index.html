@@ -1,60 +1,1718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Stopwatch Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-<html>
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        body {
+            background: linear-gradient(135deg, #111827, #1f2937);
+            color: #e5e7eb;
+            min-height: 100vh;
+            padding: 16px;
+        }
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-      integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    />
-    <link rel="stylesheet" href="style.css" />
-    <title>Simple Timer</title>
-  </head>
+        .container {
+            max-width: 1600px;
+            height: 90vh;
+            margin: 0 auto;
+            background: linear-gradient(135deg, rgba(17, 24, 39, 0.9), rgba(31, 41, 55, 0.9));
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #374151;
+        }
 
-  <body class="bg-gray-700 flex justify-center items-center min-h-screen">
-    <div class="bg-gray-900 p-16 rounded-2xl shadow w-full max-w-sm">
-      <h1 class="text-4xl text-center text-white">Timer</h1>
+        .header {
+            background: linear-gradient(90deg, rgba(55, 65, 81, 0.9), rgba(31, 41, 55, 0.9));
+            padding: 16px 24px;
+            border-bottom: 1px solid #374151;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-      <!-- Create the circle -->
-      <div
-        id="conic"
-        class="bg-conic flex items-center justify-center w-60 h-60 mx-auto my-10 rounded-full relative"
-      >
-        <p id="timer" class="text-blue-200 relative text-5xl z-10">00:00</p>
+        .header h1 {
+            font-size: 24px;
+            font-weight: bold;
+            color: #818cf8;
+            text-shadow: 0 0 15px rgba(99, 102, 241, 0.8);
+        }
 
-        <!-- Create the inner cirlce and line -->
-        <div
-          class="w-[calc(100%-4px)] aspect-square bg-gray-800 rounded-full absolute inset-[2px]"
-        ></div>
-        <!-- Create the hand/marker -->
-        <div class="hand h-1/2 absolute top-0">
-          <span
-            class="w-2 h-2 bg-white rounded-full absolute -top-1 -left-1"
-          ></span>
+        .header .icons {
+            display: flex;
+            gap: 16px;
+        }
+
+        .header .icons button {
+            background: none;
+            border: none;
+            color: #9ca3af;
+            font-size: 18px;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .header .icons button:hover {
+            color: #818cf8;
+        }
+
+        .main-content {
+            display: flex;
+            flex: 1;
+        }
+
+        .timer-panel {
+            width: 33.33%;
+            border-right: 1px solid #374151;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .timer-display {
+            position: relative;
+            width: 256px;
+            height: 256px;
+            margin-bottom: 32px;
+        }
+
+        .timer-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .timer-bg {
+            stroke: #374151;
+            stroke-width: 8;
+            fill: transparent;
+        }
+
+        .timer-progress {
+            stroke-width: 8;
+            fill: transparent;
+            transition: stroke-dashoffset 0.35s, stroke 0.35s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+
+        .timer-info {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .timer-info .time {
+            font-size: 48px;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 8px;
+        }
+
+        .timer-info .status {
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #818cf8;
+        }
+
+        .controls {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 50px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        .btn i {
+            margin-right: 8px;
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.9), rgba(99, 102, 241, 0.9));
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-start:hover {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.9), rgba(79, 70, 229, 0.9));
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.6);
+        }
+
+        .btn-pause {
+            background-color: #6b7280;
+            color: white;
+            box-shadow: 0 4px 15px rgba(107, 114, 128, 0.4);
+        }
+
+        .btn-pause:hover {
+            background-color: #4b5563;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(107, 114, 128, 0.6);
+        }
+
+        .btn-reset {
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.9), rgba(239, 68, 68, 0.9));
+            color: white;
+            box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4);
+        }
+
+        .btn-reset:hover {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.9), rgba(236, 72, 153, 0.9));
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(236, 72, 153, 0.6);
+        }
+
+        .pulse {
+            animation: pulse 1.5s infinite cubic-bezier(0.4, 0, 0.6, 1);
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 0 12px rgba(99, 102, 241, 0);
+            }
+        }
+
+        .settings {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, rgba(17, 24, 39, 0.9), rgba(31, 41, 55, 0.9));
+            border-radius: 12px;
+            border: 1px solid #374151;
+        }
+
+        .settings h2 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #a5b4fc;
+            margin-bottom: 16px;
+        }
+
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            color: #9ca3af;
+            margin-bottom: 6px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #374151;
+            border-radius: 6px;
+            background-color: #374151;
+            color: white;
+            font-size: 14px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #818cf8;
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+        }
+
+        .auto-options {
+            margin-top: 16px;
+        }
+
+        .auto-options label {
+            display: flex;
+            align-items: center;
+            color: #9ca3af;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .auto-options input[type="checkbox"] {
+            margin-right: 8px;
+            accent-color: #818cf8;
+        }
+
+        .stats {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(90deg, rgba(55, 65, 81, 0.9), rgba(31, 41, 55, 0.9));
+            border-radius: 12px;
+            border: 1px solid #374151;
+            margin-top: 24px;
+        }
+
+        .stats h2 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #a5b4fc;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+        }
+
+        .stats h2 i {
+            margin-right: 8px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .stat-item {
+            background-color: rgba(55, 65, 81, 0.7);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(55, 65, 81, 0.5);
+        }
+
+        .stat-item .label {
+            font-size: 14px;
+            color: #9ca3af;
+        }
+
+        .stat-item .value {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 4px;
+        }
+
+        .stat-item .value.study {
+            color: #818cf8;
+        }
+
+        .stat-item .value.sessions {
+            color: #10b981;
+        }
+
+        .stat-item .value.break {
+            color: #f59e0b;
+        }
+
+        .stat-item .value.rate {
+            color: #a855f7;
+        }
+
+        .history-panel {
+            width: 33.33%;
+            border-right: 1px solid #374151;
+            padding: 24px;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .history-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #a5b4fc;
+            display: flex;
+            align-items: center;
+        }
+
+        .history-header h2 i {
+            margin-right: 8px;
+        }
+
+        .history-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .history-actions button {
+            background: none;
+            border: none;
+            color: #9ca3af;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: color 0.3s ease;
+        }
+
+        .history-actions button:hover {
+            color: #818cf8;
+        }
+
+        .history-actions button i {
+            margin-right: 4px;
+        }
+
+        .session-list {
+            height: calc(100% - 40px);
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+
+        .session-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .session-list::-webkit-scrollbar-track {
+            background: #1f2937;
+            border-radius: 3px;
+        }
+
+        .session-list::-webkit-scrollbar-thumb {
+            background: #374151;
+            border-radius: 3px;
+        }
+
+        .session-item {
+            background-color: rgba(55, 65, 81, 0.5);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(55, 65, 81, 0.3);
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .session-item:hover {
+            transform: translateX(6px);
+            background-color: rgba(55, 65, 81, 0.7);
+        }
+
+        .session-type {
+            font-weight: 500;
+        }
+
+        .session-type.study {
+            color: #818cf8;
+        }
+
+        .session-type.break {
+            color: #10b981;
+        }
+
+        .session-duration {
+            font-size: 14px;
+            color: #9ca3af;
+        }
+
+        .session-time {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .notes-panel {
+            width: 33.33%;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #374151;
+            margin-bottom: 16px;
+        }
+
+        .tab {
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            color: #818cf8;
+            border-bottom-color: #818cf8;
+        }
+
+        .tab:hover {
+            color: #a5b4fc;
+        }
+
+        .notes-content, .checklist-content {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+
+        .notes-content::-webkit-scrollbar, .checklist-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .notes-content::-webkit-scrollbar-track, .checklist-content::-webkit-scrollbar-track {
+            background: #1f2937;
+            border-radius: 3px;
+        }
+
+        .notes-content::-webkit-scrollbar-thumb, .checklist-content::-webkit-scrollbar-thumb {
+            background: #374151;
+            border-radius: 3px;
+        }
+
+        .note-form {
+            display: flex;
+            margin-bottom: 16px;
+            gap: 8px;
+        }
+
+        .note-title {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #374151;
+            border-radius: 6px 0 0 6px;
+            background-color: #374151;
+            color: white;
+        }
+
+        .note-title:focus {
+            outline: none;
+            border-color: #818cf8;
+        }
+
+        .add-note-btn {
+            background-color: #818cf8;
+            color: white;
+            border: none;
+            padding: 0 16px;
+            border-radius: 0 6px 6px 0;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .add-note-btn:hover {
+            background-color: #6366f1;
+        }
+
+        .note-item {
+            background-color: rgba(55, 65, 81, 0.5);
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(55, 65, 81, 0.3);
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .note-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .note-title-text {
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: white;
+        }
+
+        .note-content {
+            font-size: 14px;
+            color: #9ca3af;
+            margin-bottom: 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .note-empty {
+            color: #6b7280;
+        }
+
+        .note-time {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .checklist-form {
+            display: flex;
+            margin-bottom: 16px;
+            gap: 8px;
+        }
+
+        .task-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #374151;
+            border-radius: 6px 0 0 6px;
+            background-color: #374151;
+            color: white;
+        }
+
+        .task-input:focus {
+            outline: none;
+            border-color: #10b981;
+        }
+
+        .priority-select {
+            padding: 10px;
+            border: 1px solid #374151;
+            border-left: none;
+            background-color: #374151;
+            color: white;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .priority-select:focus {
+            outline: none;
+            border-color: #10b981;
+        }
+
+        .add-task-btn {
+            background-color: #10b981;
+            color: white;
+            border: none;
+            padding: 0 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .add-task-btn:hover {
+            background-color: #059669;
+        }
+
+        .check-item {
+            background-color: rgba(55, 65, 81, 0.5);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(55, 65, 81, 0.3);
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            border-left-width: 4px;
+        }
+
+        .check-item.high {
+            border-left-color: #ef4444;
+        }
+
+        .check-item.medium {
+            border-left-color: #f59e0b;
+        }
+
+        .check-item.low {
+            border-left-color: #10b981;
+        }
+
+        .check-item.completed {
+            opacity: 0.6;
+            text-decoration: line-through;
+        }
+
+        .check-item:hover {
+            transform: translateX(6px);
+            background-color: rgba(55, 65, 81, 0.7);
+        }
+
+        .check-content {
+            display: flex;
+            align-items: center;
+        }
+
+        .check-checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #4b5563;
+            border-radius: 4px;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .check-item.completed .check-checkbox {
+            background-color: #10b981;
+            border-color: #10b981;
+        }
+
+        .check-checkbox i {
+            color: white;
+            font-size: 12px;
+            opacity: 0;
+        }
+
+        .check-item.completed .check-checkbox i {
+            opacity: 1;
+        }
+
+        .check-text {
+            flex: 1;
+            font-size: 14px;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 8px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .check-item:hover .task-actions {
+            opacity: 1;
+        }
+
+        .task-actions button {
+            background: none;
+            border: none;
+            color: #9ca3af;
+            font-size: 12px;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .task-actions button:hover {
+            color: #818cf8;
+        }
+
+        .task-actions .priority-icon {
+            font-size: 14px;
+        }
+
+        .task-actions .priority-icon.high {
+            color: #ef4444;
+        }
+
+        .task-actions .priority-icon.medium {
+            color: #f59e0b;
+        }
+
+        .task-actions .priority-icon.low {
+            color: #10b981;
+        }
+
+        .task-stats {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #374151;
+        }
+
+        .task-counts {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #9ca3af;
+            margin-bottom: 8px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background-color: #374151;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: #10b981;
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background-color: #1f2937;
+            padding: 24px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 100%;
+            margin: 20px;
+            border: 1px solid #374151;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .modal-header h3 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #818cf8;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: #9ca3af;
+            font-size: 20px;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .modal-close:hover {
+            color: white;
+        }
+
+        .modal-body p {
+            margin-bottom: 16px;
+            color: #e5e7eb;
+        }
+
+        .modal-body .highlight {
+            color: #818cf8;
+            font-weight: 600;
+        }
+
+        .modal-body ul {
+            list-style-type: disc;
+            padding-left: 20px;
+            margin-bottom: 16px;
+        }
+
+        .modal-body li {
+            margin-bottom: 8px;
+            color: #e5e7eb;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 16px;
+            right: 16px;
+            background-color: #1f2937;
+            border-left: 4px solid #818cf8;
+            color: white;
+            padding: 16px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            z-index: 1000;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.5s ease;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast i {
+            margin-right: 12px;
+            color: #818cf8;
+        }
+
+        @media (max-width: 1200px) {
+            .container {
+                height: auto;
+                min-height: 90vh;
+            }
+            
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .timer-panel, .history-panel, .notes-panel {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #374151;
+            }
+            
+            .timer-panel {
+                padding-bottom: 16px;
+            }
+            
+            .history-panel {
+                max-height: 300px;
+            }
+            
+            .notes-panel {
+                max-height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>Study Stopwatch Pro</h1>
+            <div class="icons">
+                <button id="theme-toggle"><i class="fas fa-moon"></i></button>
+                <button id="info-btn"><i class="fas fa-info-circle"></i></button>
+                <button id="fullscreen-btn"><i class="fas fa-expand"></i></button>
+            </div>
         </div>
-      </div>
 
-      <div class="flex justify-center gap-6">
-        <button
-          id="reset"
-          class="flex justify-center items-center w-10 h-10 bg-blue-300 rounded-full"
-        >
-          <i class="fas fa-refresh"></i>
-        </button>
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Timer Panel -->
+            <div class="timer-panel">
+                <!-- Timer Display -->
+                <div class="timer-display">
+                    <svg class="timer-svg" viewBox="0 0 100 100">
+                        <circle class="timer-bg" r="40" cx="50" cy="50" />
+                        <circle id="progress-circle" class="timer-progress" r="40" cx="50" cy="50" 
+                                stroke-dasharray="251.2" stroke-dashoffset="251.2" />
+                    </svg>
+                    <div class="timer-info">
+                        <div id="display" class="time">00:00:00</div>
+                        <div id="status" class="status">Ready</div>
+                    </div>
+                </div>
 
-        <button
-          id="play"
-          class="flex justify-center items-center w-10 h-10 bg-blue-300 rounded-full group"
-        >
-          <i class="fas fa-play"></i>
-        </button>
-      </div>
+                <!-- Controls -->
+                <div class="controls">
+                    <button id="startBtn" class="btn btn-start pulse">
+                        <i class="fas fa-play"></i>Start
+                    </button>
+                    <button id="pauseBtn" class="btn btn-pause" style="display: none;">
+                        <i class="fas fa-pause"></i>Pause
+                    </button>
+                    <button id="resetBtn" class="btn btn-reset">
+                        <i class="fas fa-redo"></i>Reset
+                    </button>
+                </div>
+
+                <!-- Settings -->
+                <div class="settings">
+                    <h2>Study Settings</h2>
+                    <div class="settings-grid">
+                        <div class="form-group">
+                            <label for="study-time">Study Duration (min)</label>
+                            <input type="number" id="study-time" class="form-control" min="1" max="120" value="25">
+                        </div>
+                        <div class="form-group">
+                            <label for="break-time">Break Duration (min)</label>
+                            <input type="number" id="break-time" class="form-control" min="1" max="30" value="5">
+                        </div>
+                    </div>
+                    <div class="auto-options">
+                        <label>
+                            <input type="checkbox" id="auto-start-break" checked>
+                            Auto-start break after study
+                        </label>
+                        <label>
+                            <input type="checkbox" id="auto-start-study" checked>
+                            Auto-start study after break
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Statistics -->
+                <div class="stats">
+                    <h2><i class="fas fa-chart-bar"></i> Today's Stats</h2>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="label">Study Time</div>
+                            <div id="total-study" class="value study">0 min</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="label">Sessions</div>
+                            <div id="total-sessions" class="value sessions">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="label">Break Time</div>
+                            <div id="total-break" class="value break">0 min</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="label">Focus Rate</div>
+                            <div id="focus-rate" class="value rate">0%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- History Panel -->
+            <div class="history-panel">
+                <div class="history-header">
+                    <h2><i class="fas fa-history"></i> Session History</h2>
+                    <div class="history-actions">
+                        <button id="clear-sessions"><i class="fas fa-trash"></i> Clear</button>
+                        <button id="export-sessions"><i class="fas fa-file-export"></i> Export</button>
+                    </div>
+                </div>
+                <div id="session-list" class="session-list">
+                    <!-- Sessions will be added here -->
+                </div>
+            </div>
+
+            <!-- Notes & Checklist Panel -->
+            <div class="notes-panel">
+                <div class="tabs">
+                    <div id="notes-tab" class="tab active">Notes</div>
+                    <div id="checklist-tab" class="tab">Checklist</div>
+                </div>
+
+                <!-- Notes Content -->
+                <div id="notes-content" class="notes-content">
+                    <div class="note-form">
+                        <input type="text" id="note-title" class="note-title" placeholder="Note title...">
+                        <button id="add-note" class="add-note-btn"><i class="fas fa-plus"></i></button>
+                    </div>
+                    <div id="notes-container">
+                        <!-- Notes will be added here -->
+                    </div>
+                </div>
+
+                <!-- Checklist Content -->
+                <div id="checklist-content" class="checklist-content" style="display: none;">
+                    <div class="checklist-form">
+                        <input type="text" id="task-input" class="task-input" placeholder="Add a task...">
+                        <select id="task-priority" class="priority-select">
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                        <button id="add-task" class="add-task-btn"><i class="fas fa-plus"></i></button>
+                    </div>
+                    <div id="checklist-container">
+                        <!-- Tasks will be added here -->
+                    </div>
+                    <div class="task-stats">
+                        <div class="task-counts">
+                            <span id="task-count">0 tasks</span>
+                            <span id="completed-count">0 completed</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div id="progress-bar" class="progress-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <script src="script.js"></script>
-  </body>
+
+    <!-- Info Modal -->
+    <div id="info-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>About Study Stopwatch Pro</h3>
+                <button id="close-modal" class="modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <p>This advanced stopwatch helps you track your study sessions using the Pomodoro technique with enhanced features.</p>
+                <p><span class="highlight">Features:</span></p>
+                <ul>
+                    <li>Timer with visual progress indicator</li>
+                    <li>Customizable study and break durations</li>
+                    <li>Auto-start options for seamless transitions</li>
+                    <li>Session history with detailed statistics</li>
+                    <li>Notes system for capturing ideas</li>
+                    <li>Task checklist with priority levels</li>
+                    <li>Dark/light theme toggle</li>
+                    <li>Export session data</li>
+                </ul>
+                <p class="pt-2 text-sm text-gray-400">Stay focused and productive with all-in-one study tracking!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <i class="fas fa-bell"></i>
+        <span id="toast-message"></span>
+    </div>
+
+    <script>
+        // DOM Elements
+        const display = document.getElementById('display');
+        const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const progressCircle = document.getElementById('progress-circle');
+        const statusText = document.getElementById('status');
+        const sessionList = document.getElementById('session-list');
+        const studyTimeInput = document.getElementById('study-time');
+        const breakTimeInput = document.getElementById('break-time');
+        const themeToggle = document.getElementById('theme-toggle');
+        const infoBtn = document.getElementById('info-btn');
+        const closeModal = document.getElementById('close-modal');
+        const infoModal = document.getElementById('info-modal');
+        const notesTab = document.getElementById('notes-tab');
+        const checklistTab = document.getElementById('checklist-tab');
+        const notesContent = document.getElementById('notes-content');
+        const checklistContent = document.getElementById('checklist-content');
+        const noteTitle = document.getElementById('note-title');
+        const addNoteBtn = document.getElementById('add-note');
+        const notesContainer = document.getElementById('notes-container');
+        const taskInput = document.getElementById('task-input');
+        const taskPriority = document.getElementById('task-priority');
+        const addTaskBtn = document.getElementById('add-task');
+        const checklistContainer = document.getElementById('checklist-container');
+        const taskCount = document.getElementById('task-count');
+        const completedCount = document.getElementById('completed-count');
+        const progressBar = document.getElementById('progress-bar');
+        const totalStudy = document.getElementById('total-study');
+        const totalSessions = document.getElementById('total-sessions');
+        const totalBreak = document.getElementById('total-break');
+        const focusRate = document.getElementById('focus-rate');
+        const clearSessions = document.getElementById('clear-sessions');
+        const exportSessions = document.getElementById('export-sessions');
+        const autoStartBreak = document.getElementById('auto-start-break');
+        const autoStartStudy = document.getElementById('auto-start-study');
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toast-message');
+        const fullscreenBtn = document.getElementById('fullscreen-btn');
+
+        // Timer variables
+        let startTime;
+        let elapsedTime = 0;
+        let timerInterval;
+        let isRunning = false;
+        let isStudyTime = true;
+        let studyDuration = 25 * 60 * 1000; // 25 minutes in milliseconds
+        let breakDuration = 5 * 60 * 1000;  // 5 minutes in milliseconds
+        let targetTime = studyDuration;
+        let autoStartBreakEnabled = true;
+        let autoStartStudyEnabled = true;
+
+        // Statistics variables
+        let totalStudyTime = 0;
+        let totalBreakTime = 0;
+        let sessionCount = 0;
+        let taskList = [];
+        let notesList = [];
+
+        // Initialize
+        updateDisplay(0);
+        updateProgressCircle(0);
+        updateStatistics();
+        updateTaskStats();
+        loadNotes();
+        loadTasks();
+
+        // Event Listeners
+        startBtn.addEventListener('click', startTimer);
+        pauseBtn.addEventListener('click', pauseTimer);
+        resetBtn.addEventListener('click', resetTimer);
+        studyTimeInput.addEventListener('change', updateSettings);
+        breakTimeInput.addEventListener('change', updateSettings);
+        themeToggle.addEventListener('click', toggleTheme);
+        infoBtn.addEventListener('click', () => infoModal.classList.add('show'));
+        closeModal.addEventListener('click', () => infoModal.classList.remove('show'));
+        notesTab.addEventListener('click', showNotes);
+        checklistTab.addEventListener('click', showChecklist);
+        addNoteBtn.addEventListener('click', addNote);
+        addTaskBtn.addEventListener('click', addTask);
+        clearSessions.addEventListener('click', clearSessionHistory);
+        exportSessions.addEventListener('click', exportSessionData);
+        autoStartBreak.addEventListener('change', () => autoStartBreakEnabled = autoStartBreak.checked);
+        autoStartStudy.addEventListener('change', () => autoStartStudyEnabled = autoStartStudy.checked);
+        fullscreenBtn.addEventListener('click', toggleFullscreen);
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === ' ') {
+                e.preventDefault();
+                if (isRunning) {
+                    pauseTimer();
+                } else {
+                    startTimer();
+                }
+            } else if (e.key === 'r' || e.key === 'R') {
+                resetTimer();
+            }
+        });
+
+        // Timer functions
+        function startTimer() {
+            if (!isRunning) {
+                startTime = Date.now() - elapsedTime;
+                timerInterval = setInterval(updateTimer, 10);
+                isRunning = true;
+                startBtn.classList.add('hidden');
+                pauseBtn.style.display = 'flex';
+                statusText.textContent = isStudyTime ? 'Studying' : 'On Break';
+                statusText.className = 'status ' + (isStudyTime ? 'text-blue-400' : 'text-green-400');
+            }
+        }
+
+        function pauseTimer() {
+            if (isRunning) {
+                clearInterval(timerInterval);
+                isRunning = false;
+                startBtn.classList.remove('hidden');
+                pauseBtn.style.display = 'none';
+                statusText.textContent = 'Paused';
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            isRunning = false;
+            elapsedTime = 0;
+            updateDisplay(elapsedTime);
+            updateProgressCircle(0);
+            startBtn.classList.remove('hidden');
+            pauseBtn.style.display = 'none';
+            statusText.textContent = 'Ready';
+            statusText.className = 'status text-blue-400';
+            isStudyTime = true;
+            targetTime = studyDuration;
+        }
+
+        function updateTimer() {
+            elapsedTime = Date.now() - startTime;
+            
+            if (elapsedTime >= targetTime) {
+                // Time's up - switch modes
+                clearInterval(timerInterval);
+                isRunning = false;
+                
+                // Add to session history
+                addSessionToHistory();
+                
+                // Switch between study and break
+                isStudyTime = !isStudyTime;
+                elapsedTime = 0;
+                targetTime = isStudyTime ? studyDuration : breakDuration;
+                
+                // Update UI
+                statusText.textContent = isStudyTime ? 'Study Time!' : 'Break Time!';
+                statusText.className = 'status ' + (isStudyTime ? 'text-blue-400' : 'text-green-400');
+                
+                // Auto-start next session if enabled
+                if ((isStudyTime && autoStartStudyEnabled) || (!isStudyTime && autoStartBreakEnabled)) {
+                    setTimeout(() => {
+                        startTimer();
+                    }, 1500);
+                } else {
+                    startBtn.classList.remove('hidden');
+                    pauseBtn.style.display = 'none';
+                }
+                
+                // Show notification
+                showNotification(isStudyTime ? 'Back to study!' : 'Time for a break!');
+                
+                return;
+            }
+            
+            updateDisplay(elapsedTime);
+            updateProgressCircle(elapsedTime / targetTime * 100);
+        }
+
+        function updateDisplay(time) {
+            const hours = Math.floor(time / 3600000);
+            const minutes = Math.floor((time % 3600000) / 60000);
+            const seconds = Math.floor((time % 60000) / 1000);
+            
+            display.textContent = 
+                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function updateProgressCircle(percent) {
+            const circumference = 251.2; // 2 * π * r (where r=40)
+            const offset = circumference - (percent / 100) * circumference;
+            progressCircle.style.strokeDashoffset = offset;
+            
+            // Change color based on mode
+            progressCircle.setAttribute('stroke', isStudyTime ? '#818cf8' : '#10b981');
+        }
+
+        function updateSettings() {
+            studyDuration = parseInt(studyTimeInput.value) * 60 * 1000;
+            breakDuration = parseInt(breakTimeInput.value) * 60 * 1000;
+            
+            if (!isRunning) {
+                targetTime = isStudyTime ? studyDuration : breakDuration;
+                updateDisplay(0);
+                updateProgressCircle(0);
+            }
+        }
+
+        // Statistics functions
+        function updateStatistics() {
+            totalStudy.textContent = `${Math.floor(totalStudyTime / 60000)} min`;
+            totalSessions.textContent = sessionCount;
+            totalBreak.textContent = `${Math.floor(totalBreakTime / 60000)} min`;
+            
+            // Calculate focus rate: study time / (study time + break time)
+            const totalTime = totalStudyTime + totalBreakTime;
+            const rate = totalTime > 0 ? Math.round((totalStudyTime / totalTime) * 100) : 0;
+            focusRate.textContent = `${rate}%`;
+        }
+
+        function addSessionToHistory() {
+            const sessionDuration = isStudyTime ? studyDuration : breakDuration;
+            
+            if (isStudyTime) {
+                totalStudyTime += sessionDuration;
+            } else {
+                totalBreakTime += sessionDuration;
+                sessionCount++;
+            }
+            updateStatistics();
+
+            const sessionItem = document.createElement('div');
+            sessionItem.className = 'session-item';
+            
+            const sessionType = document.createElement('span');
+            sessionType.className = 'session-type ' + (isStudyTime ? 'study' : 'break');
+            sessionType.textContent = isStudyTime ? 'Study' : 'Break';
+            
+            const sessionDurationEl = document.createElement('span');
+            sessionDurationEl.className = 'session-duration';
+            
+            const minutes = Math.floor(sessionDuration / 60000);
+            sessionDurationEl.textContent = `${minutes} min`;
+            
+            const sessionTime = document.createElement('span');
+            sessionTime.className = 'session-time';
+            sessionTime.textContent = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            sessionItem.appendChild(sessionType);
+            sessionItem.appendChild(sessionDurationEl);
+            sessionItem.appendChild(sessionTime);
+            
+            sessionList.prepend(sessionItem);
+            
+            // Limit to 15 sessions
+            if (sessionList.children.length > 15) {
+                sessionList.removeChild(sessionList.lastChild);
+            }
+        }
+
+        function clearSessionHistory() {
+            if (confirm('Are you sure you want to clear all session history?')) {
+                sessionList.innerHTML = '';
+                totalStudyTime = 0;
+                totalBreakTime = 0;
+                sessionCount = 0;
+                updateStatistics();
+                showNotification('Session history cleared');
+            }
+        }
+
+        function exportSessionData() {
+            const sessions = [];
+            for (let i = 0; i < sessionList.children.length; i++) {
+                const item = sessionList.children[i];
+                const type = item.children[0].textContent;
+                const duration = item.children[1].textContent;
+                const time = item.children[2].textContent;
+                sessions.push({ type, duration, time });
+            }
+            
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({
+                date: new Date().toISOString().split('T')[0],
+                totalStudyTime: totalStudyTime,
+                totalBreakTime: totalBreakTime,
+                sessionCount: sessionCount,
+                sessions: sessions
+            }, null, 2));
+            
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "study_sessions_" + new Date().toISOString().split('T')[0] + ".json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+            
+            showNotification('Session data exported');
+        }
+
+        // Notes functions
+        function showNotes() {
+            notesTab.classList.add('active');
+            notesTab.classList.remove('text-gray-400');
+            checklistTab.classList.remove('active');
+            notesContent.style.display = 'block';
+            checklistContent.style.display = 'none';
+        }
+
+        function showChecklist() {
+            checklistTab.classList.add('active');
+            notesTab.classList.remove('active');
+            notesContent.style.display = 'none';
+            checklistContent.style.display = 'block';
+        }
+
+        function addNote() {
+            const title = noteTitle.value.trim();
+            if (title === '') return;
+            
+            const note = {
+                id: Date.now(),
+                title: title,
+                content: '',
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+            
+            notesList.unshift(note);
+            saveNotes();
+            renderNotes();
+            noteTitle.value = '';
+            
+            showNotification('Note added');
+        }
+
+        function deleteNote(id) {
+            notesList = notesList.filter(note => note.id !== id);
+            saveNotes();
+            renderNotes();
+            showNotification('Note deleted');
+        }
+
+        function editNote(id) {
+            const note = notesList.find(n => n.id === id);
+            if (!note) return;
+            
+            const newContent = prompt('Edit note:', note.content);
+            if (newContent !== null) {
+                note.content = newContent;
+                note.updatedAt = new Date().toISOString();
+                saveNotes();
+                renderNotes();
+                showNotification('Note updated');
+            }
+        }
+
+        function renderNotes() {
+            notesContainer.innerHTML = '';
+            
+            if (notesList.length === 0) {
+                notesContainer.innerHTML = '<div class="note-item text-center text-gray-500 py-4">No notes yet. Add one above!</div>';
+                return;
+            }
+            
+            notesList.forEach(note => {
+                const noteItem = document.createElement('div');
+                noteItem.className = 'note-item';
+                noteItem.setAttribute('data-id', note.id);
+                
+                const titleEl = document.createElement('div');
+                titleEl.className = 'note-title-text';
+                titleEl.textContent = note.title;
+                
+                const contentEl = document.createElement('div');
+                contentEl.className = 'note-content';
+                if (note.content && note.content.trim() !== '') {
+                    contentEl.textContent = note.content;
+                } else {
+                    contentEl.textContent = 'No content';
+                    contentEl.className += ' note-empty';
+                }
+                
+                const timeEl = document.createElement('div');
+                timeEl.className = 'note-time';
+                const createdAt = new Date(note.createdAt);
+                timeEl.textContent = `Created ${formatTimeAgo(createdAt)}`;
+                
+                if (note.updatedAt !== note.createdAt) {
+                    const updatedAt = new Date(note.updatedAt);
+                    timeEl.textContent += ` • Updated ${formatTimeAgo(updatedAt)}`;
+                }
+                
+                noteItem.appendChild(titleEl);
+                noteItem.appendChild(contentEl);
+                noteItem.appendChild(timeEl);
+                
+                // Add click event to edit
+                noteItem.addEventListener('click', function(e) {
+                    // Only trigger edit if not clicking on a button
+                    if (!e.target.closest('button')) {
+                        editNote(note.id);
+                    }
+                });
+                
+                notesContainer.appendChild(noteItem);
+            });
+        }
+
+        function saveNotes() {
+            localStorage.setItem('studyStopwatchNotes', JSON.stringify(notesList));
+        }
+
+        function loadNotes() {
+            const saved = localStorage.getItem('studyStopwatchNotes');
+            if (saved) {
+                try {
+                    notesList = JSON.parse(saved);
+                    renderNotes();
+                } catch (e) {
+                    console.error('Error loading notes:', e);
+                }
+            }
+        }
+
+        // Checklist functions
+        function addTask() {
+            const text = taskInput.value.trim();
+            const priority = taskPriority.value;
+            
+            if (text === '') return;
+            
+            const task = {
+                id: Date.now(),
+                text: text,
+                completed: false,
+                priority: priority,
+                createdAt: new Date().toISOString()
+            };
+            
+            taskList.unshift(task);
+            saveTasks();
+            renderTasks();
+            taskInput.value = '';
+            
+            showNotification('Task added');
+            updateTaskStats();
+        }
+
+        function toggleTask(id) {
+            const task = taskList.find(t => t.id === id);
+            if (task) {
+                task.completed = !task.completed;
+                saveTasks();
+                renderTasks();
+                updateTaskStats();
+                showNotification(task.completed ? 'Task completed!' : 'Task marked incomplete');
+            }
+        }
+
+        function deleteTask(id) {
+            taskList = taskList.filter(task => task.id !== id);
+            saveTasks();
+            renderTasks();
+            updateTaskStats();
+            showNotification('Task deleted');
+        }
+
+        function editTask(id) {
+            const task = taskList.find(t => t.id === id);
+            if (!task) return;
+            
+            const newText = prompt('Edit task:', task.text);
+            if (newText !== null && newText.trim() !== '') {
+                task.text = newText.trim();
+                saveTasks();
+                renderTasks();
+                showNotification('Task updated');
+            }
+        }
+
+        function renderTasks() {
+            checklistContainer.innerHTML = '';
+            
+            if (taskList.length === 0) {
+                checklistContainer.innerHTML = '<div class="check-item text-center text-gray-500 py-4">No tasks yet. Add one above!</div>';
+                return;
+            }
+            
+            // Sort tasks: incomplete first, then by priority (high, medium, low), then by creation date
+            const sortedTasks = [...taskList].sort((a, b) => {
+                if (a.completed !== b.completed) {
+                    return a.completed ? 1 : -1;
+                }
+                if (a.priority !== b.priority) {
+                    const priorityOrder = { high: 0, medium: 1, low: 2 };
+                    return priorityOrder[a.priority] - priorityOrder[b.priority];
+                }
+                return new Date(b.createdAt) - new Date(a.createdAt);
+            });
+            
+            sortedTasks.forEach(task => {
+                const taskItem = document.createElement('div');
+                taskItem.className = `check-item ${task.priority} ${task.completed ? 'completed' : ''}`;
+                taskItem.setAttribute('data-id', task.id);
+                
+                const checkContent = document.createElement('div');
+                checkContent.className = 'check-content';
+                
+                const checkbox = document.createElement('div');
+                checkbox.className = 'check-checkbox';
+                if (task.completed) {
+                    checkbox.innerHTML = '<i class="fas fa-check"></i>';
+                }
+                
+                const textSpan = document.createElement('div');
+                textSpan.className = 'check-text';
+                textSpan.textContent = task.text;
+                
+                checkContent.appendChild(checkbox);
+                checkContent.appendChild(textSpan);
+                
+                // Right side actions
+                const actions = document.createElement('div');
+                actions.className = 'task-actions';
+                
+                const priorityIcon = document.createElement('i');
+                priorityIcon.className = `fas fa-flag priority-icon ${task.priority}`;
+                
+                const editBtn = document.createElement('button');
+                editBtn.innerHTML = '<i class="fas fa-edit"></i>';
+                editBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    editTask(task.id);
+                });
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+                deleteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deleteTask(task.id);
+                });
+                
+                actions.appendChild(priorityIcon);
+                actions.appendChild(editBtn);
+                actions.appendChild(deleteBtn);
+                
+                taskItem.appendChild(checkContent);
+                taskItem.appendChild(actions);
+                
+                // Click to toggle completion
+                taskItem.addEventListener('click', () => toggleTask(task.id));
+                
+                checklistContainer.appendChild(taskItem);
+            });
+        }
+
+        function updateTaskStats() {
+            const total = taskList.length;
+            const completed = taskList.filter(t => t.completed).length;
+            const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+            
+            taskCount.textContent = `${total} tasks`;
+            completedCount.textContent = `${completed} completed`;
+            progressBar.style.width = `${percent}%`;
+        }
+
+        function saveTasks() {
+            localStorage.setItem('studyStopwatchTasks', JSON.stringify(taskList));
+        }
+
+        function loadTasks() {
+            const saved = localStorage.getItem('studyStopwatchTasks');
+            if (saved) {
+                try {
+                    taskList = JSON.parse(saved);
+                    renderTasks();
+                    updateTaskStats();
+                } catch (e) {
+                    console.error('Error loading tasks:', e);
+                }
+            }
+        }
+
+        // Utility functions
+        function showNotification(message) {
+            toastMessage.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function toggleTheme() {
+            const icon = themeToggle.querySelector('i');
+            const body = document.body;
+            
+            if (body.classList.contains('dark')) {
+                body.classList.remove('dark');
+                body.style.background = 'linear-gradient(135deg, #f3f4f6, #e5e7eb)';
+                icon.classList.replace('fa-moon', 'fa-sun');
+            } else {
+                body.classList.add('dark');
+                body.style.background = 'linear-gradient(135deg, #111827, #1f2937)';
+                icon.classList.replace('fa-sun', 'fa-moon');
+            }
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log(`Error attempting to enable full-screen mode: ${err.message}`);
+                });
+                fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+                fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
+            }
+        }
+
+        function formatTimeAgo(date) {
+            const now = new Date();
+            const diff = now - date;
+            const seconds = Math.floor(diff / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+            
+            if (days > 0) {
+                return `${days}d ago`;
+            } else if (hours > 0) {
+                return `${hours}h ago`;
+            } else if (minutes > 0) {
+                return `${minutes}m ago`;
+            } else {
+                return `${seconds}s ago`;
+            }
+        }
+
+        // Initialize
+        document.body.classList.add('dark');
+        autoStartBreak.checked = true;
+        autoStartStudy.checked = true;
+    </script>
+</body>
 </html>
