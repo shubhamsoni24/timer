@@ -1193,18 +1193,18 @@
         fullscreenBtn.addEventListener('click', toggleFullscreen);
 
         // Keyboard shortcuts
-        document.addEventListener('keydown', (e) => {
-            if (e.key === ' ') {
-                e.preventDefault();
-                if (isRunning) {
-                    pauseTimer();
-                } else {
-                    startTimer();
+       // document.addEventListener('keydown', (e) => {
+           // if (e.key === ' ') {
+           //     e.preventDefault();
+               // if (isRunning) {
+                  //  pauseTimer();
+               // } else {
+                   // startTimer();
                 }
-            } else if (e.key === 'r' || e.key === 'R') {
-                resetTimer();
-            }
-        });
+           // } else if (e.key === 'r' || e.key === 'R') {
+               // resetTimer();
+           // }
+        //});
 
         // Timer functions
         function startTimer() {
